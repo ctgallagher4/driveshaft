@@ -4,6 +4,7 @@ version = "0.1.0"
 description = "A minimal, high-performance thread pool for running synchronous tasks with per-thread context from async code."
 authors = ["Charlie Gallagher"]
 edition = "2024"
+license = "MIT OR Apache-2.0"
 
 [dependencies]
 crossbeam = { version = "^0.8.0" }
