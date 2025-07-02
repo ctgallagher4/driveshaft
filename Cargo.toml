@@ -1,6 +1,6 @@
 [package]
 name = "driveshaft"
-version = "0.1.0"
+version = "0.1.1"
 description = "A minimal, high-performance thread pool for running synchronous tasks with per-thread context from async code."
 authors = ["Charlie Gallagher"]
 edition = "2024"
