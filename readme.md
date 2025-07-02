@@ -2,6 +2,8 @@
 
 **A minimal, high-performance thread pool for running synchronous tasks with per-thread context from async code.**
 
+**NOTE: This repository is under heavy development**
+
 ---
 
 ## What is DriveShaft?
@@ -12,7 +14,7 @@ This is especially useful when integrating **blocking libraries** (like RocksDB,
 
 ---
 
-## 🔍 Key Features
+## Key Features
 
 - **Run sync closures from async code** with `.run_with(...)`
 - **Custom per-thread context** (`&mut T`) — no `Arc<Mutex<_>>` needed
