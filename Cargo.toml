@@ -5,6 +5,8 @@ description = "A minimal, high-performance thread pool for running synchronous t
 authors = ["Charlie Gallagher"]
 edition = "2024"
 license = "MIT OR Apache-2.0"
+readme = "readme.md"
+repository = "https://github.com/ctgallagher4/driveshaft"
 
 [dependencies]
 crossbeam = { version = "^0.8.0" }
