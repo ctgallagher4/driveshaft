@@ -67,7 +67,7 @@ where
                 .map_err(|_err| DriveShaftError::SendError)?;
             Ok(())
         };
-        self.workers[idx].send(Box::new(wrapped_job));
+        self.workers[idx].send(Box::new(wrapped_job))?;
         rx.await.map_err(|_err| DriveShaftError::RecvError)
     }
 }

@@ -1,7 +1,10 @@
-use crossbeam::channel::{Receiver, Sender, bounded, unbounded};
+use crossbeam::channel::{bounded, unbounded};
 use std::thread;
 
-use crate::job::{Job, JobReciever, JobSender};
+use crate::{
+    DriveShaftError,
+    job::{Job, JobReciever, JobSender},
+};
 
 #[derive(Copy, Clone)]
 pub enum WorkerType {
@@ -23,7 +26,7 @@ fn spawn_tx<T: Send + 'static>(mut context: T, worker_type: WorkerType) -> JobSe
     tx
 }
 
-struct BoundedWorker<T> {
+pub struct BoundedWorker<T> {
     sender: JobSender<T>,
 }
 
@@ -37,7 +40,7 @@ impl<T> BoundedWorker<T> {
     }
 }
 
-struct UnboundedWorker<T> {
+pub struct UnboundedWorker<T> {
     pub sender: JobSender<T>,
 }
 
@@ -67,10 +70,16 @@ impl<T> Worker<T> {
         }
     }
 
-    pub fn send(&self, job: Job<T>) {
+    pub fn send(&self, job: Job<T>) -> Result<(), DriveShaftError> {
         match self {
-            Self::Bounded(worker) => worker.sender.send(job),
-            Self::Unbounded(worker) => worker.sender.send(job),
-        };
+            Self::Bounded(worker) => worker
+                .sender
+                .send(job)
+                .map_err(|_err| DriveShaftError::SendError),
+            Self::Unbounded(worker) => worker
+                .sender
+                .send(job)
+                .map_err(|_err| DriveShaftError::SendError),
+        }
     }
 }
