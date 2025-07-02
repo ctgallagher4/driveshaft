@@ -3,6 +3,10 @@ mod job;
 mod pool;
 mod worker;
 
+pub use crate::{
+    error::DriveShaftError, pool::DriveShaftPool, pool::DriveShaftPoolBuilder, worker::WorkerType,
+};
+
 #[cfg(test)]
 mod tests {
 

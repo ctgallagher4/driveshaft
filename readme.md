@@ -97,6 +97,10 @@ A DriveShaftPool distributes jobs across threads using round-robin.
 
 -[] Runtime-agnostic executor trait
 
+## Contributing
+
+Feedback and contributions are welcome.
+
 ## License
 
 MIT or Apache-2.0 — your choice.
