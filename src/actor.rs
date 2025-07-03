@@ -4,7 +4,7 @@ use std::{collections::VecDeque, iter, sync::Arc, thread::JoinHandle};
 use crate::job::Job;
 
 pub struct Actor {
-    handle: JoinHandle<()>,
+    pub handle: JoinHandle<()>,
 }
 
 impl Actor {
@@ -13,7 +13,7 @@ impl Actor {
         fifo: Worker<Job<T>>,
         global: Arc<Injector<Job<T>>>,
         stealers: Arc<VecDeque<Stealer<Job<T>>>>,
-    ) -> JoinHandle<()> {
+    ) -> Self {
         let handle = std::thread::spawn(move || {
             loop {
                 let job = fifo.pop().or_else(|| {
@@ -30,6 +30,6 @@ impl Actor {
                 }
             }
         });
-        handle
+        Self { handle }
     }
 }

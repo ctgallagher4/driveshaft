@@ -1,12 +1,12 @@
 use crossbeam::deque::{Injector, Worker};
-use std::{collections::VecDeque, fmt::Debug, sync::Arc, thread::JoinHandle};
+use std::{collections::VecDeque, fmt::Debug, sync::Arc};
 use tokio::sync::oneshot;
 
 use crate::{actor::Actor, error::DriveShaftError, job::Job};
 
 pub struct DriveShaftPool<T> {
     injector: Arc<Injector<Job<T>>>,
-    actors: Vec<JoinHandle<()>>,
+    pub actors: Vec<Actor>,
 }
 
 impl<T> DriveShaftPool<T>
