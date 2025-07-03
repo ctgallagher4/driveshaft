@@ -7,7 +7,6 @@ use std::{
     sync::Mutex,
     task::{Poll, Waker},
 };
-use tokio::sync::oneshot;
 
 use crate::{actor::Actor, error::DriveShaftError, job::Job};
 
@@ -67,7 +66,7 @@ where
         Self { injector, actors }
     }
 
-    pub async fn run_with<R, F>(&self, job: F) -> RunWithFuture<R>
+    pub fn run_with<R, F>(&self, job: F) -> RunWithFuture<R>
     where
         F: FnOnce(&mut T) -> R + Send + 'static,
         R: Send + Debug + 'static,
