@@ -29,7 +29,6 @@ This is especially useful when integrating **blocking libraries** (like RocksDB,
 
 ```rust
 use driveshaft::DriveShaftPool;
-use rocksdb::DB;
 
 #[tokio::main]
 async fn main() {
