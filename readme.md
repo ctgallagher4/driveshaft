@@ -18,8 +18,7 @@ This is especially useful when integrating **blocking libraries** (like RocksDB,
 
 - **Run sync closures from async code** with `.run_with(...)`
 - **Custom per-thread context** (`&mut T`) — no `Arc<Mutex<_>>` needed
-- **Bounded or unbounded channels** for backpressure or unbounded throughput
-- **Round-robin load balancing** across threads
+- **Work Stealing** across threads
 - **Returns results via async `await`**
 - Foundation for higher-level wrappers (TBD)
 
@@ -38,9 +37,7 @@ async fn main() {
         .collect();
 
     // Spawn a pool with those contexts
-    let mut pool = DriveShaftPoolBuilder::new()
-        .worker_type(driveshaft::WorkerType::Bound(32)) // 32-slot queue per worker
-        .build(ctxs);
+    let mut pool = DriveShaftPool::new(ctxs);
 
     // Run a blocking call from async context
     let result = pool
