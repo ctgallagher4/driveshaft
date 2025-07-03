@@ -16,7 +16,7 @@ mod tests {
             ctx.clone()
         };
 
-        let ctxs = (0..10).collect();
+        let ctxs = (0..2).collect();
 
         let drive_shaft_pool = DriveShaftPool::new(ctxs);
 

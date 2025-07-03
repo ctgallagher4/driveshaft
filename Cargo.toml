@@ -9,6 +9,7 @@ readme = "readme.md"
 repository = "https://github.com/ctgallagher4/driveshaft"
 
 [dependencies]
+core_affinity = "0.8.3"
 crossbeam = "^0.8.0"
 thiserror = { version = "^2.0.0" }
 tokio = { version = "1.0", features = ["rt", "macros", "sync"] }

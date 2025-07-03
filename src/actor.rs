@@ -1,3 +1,4 @@
+use core_affinity::CoreId;
 use crossbeam::deque::{Injector, Stealer, Worker};
 use std::{collections::VecDeque, iter, sync::Arc, thread::JoinHandle};
 
@@ -13,8 +14,10 @@ impl Actor {
         fifo: Worker<Job<T>>,
         global: Arc<Injector<Job<T>>>,
         stealers: Arc<VecDeque<Stealer<Job<T>>>>,
+        core_id: CoreId,
     ) -> Self {
         let handle = std::thread::spawn(move || {
+            core_affinity::set_for_current(core_id);
             loop {
                 let job = fifo.pop().or_else(|| {
                     iter::repeat_with(|| {

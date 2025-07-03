@@ -14,6 +14,20 @@ where
     T: Send + 'static,
 {
     pub fn new(mut ctxs: VecDeque<T>) -> Self {
+        let mut core_ids = VecDeque::new();
+        let logical_cores = core_affinity::get_core_ids()
+            .map(|v| {
+                core_ids.extend(v.clone());
+                v.len()
+            })
+            .unwrap_or(0);
+        let num = ctxs.len();
+        if num > logical_cores {
+            eprintln!(
+                "⚠️  [driveshaft] Warning: {num} threads requested but only {logical_cores} logical cores available. Consider lowering the thread count."
+            );
+        }
+
         let injector = Arc::new(Injector::new());
         let mut workers = VecDeque::with_capacity(ctxs.len());
         let mut stealers = VecDeque::with_capacity(ctxs.len());
@@ -27,15 +41,18 @@ where
 
         let stealers = Arc::new(stealers);
         let mut actors = Vec::with_capacity(ctxs.len());
-        for _i in 0..ctxs.len() {
+        for _ in 0..ctxs.len() {
             if let Some(worker) = workers.remove(0) {
                 if let Some(ctx) = ctxs.remove(0) {
-                    actors.push(Actor::new(
-                        ctx,
-                        worker,
-                        Arc::clone(&injector),
-                        Arc::clone(&stealers),
-                    ));
+                    if let Some(core_id) = core_ids.remove(0) {
+                        actors.push(Actor::new(
+                            ctx,
+                            worker,
+                            Arc::clone(&injector),
+                            Arc::clone(&stealers),
+                            core_id,
+                        ));
+                    }
                 }
             }
         }
