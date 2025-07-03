@@ -33,21 +33,20 @@ use rocksdb::DB;
 
 #[tokio::main]
 async fn main() {
-    // Create 4 RocksDB contexts — one for each worker
-    let dbs: Vec<_> = (0..4)
-        .map(|_| DB::open_default("mydb").unwrap())
+    // Create 4 contexts — one for each worker
+    let ctxs: Vec<_> = (0..4)
+        .map(|_| create_context())
         .collect();
 
     // Spawn a pool with those contexts
-    let mut pool = DriveShaftPool::builder()
+    let mut pool = DriveShaftPoolBuilder::new()
         .worker_type(driveshaft::WorkerType::Bound(32)) // 32-slot queue per worker
-        .build(dbs);
+        .build(ctxs);
 
-    // Run a blocking RocksDB call from async context
+    // Run a blocking call from async context
     let result = pool
-        .run_with(|db| db.get(b"my-key").unwrap())
-        .await
-        .unwrap();
+        .run_with(|ctx| ctx.do_something())
+        .await;
 
     println!("Value: {:?}", result);
 }
