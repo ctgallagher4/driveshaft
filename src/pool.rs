@@ -53,7 +53,7 @@ impl<T> DriveShaftPool<T>
 where
     T: Send + 'static,
 {
-    pub async fn run_with<R, F>(&mut self, job: F) -> Result<R, DriveShaftError>
+    pub async fn run_with<R, F>(&self, job: F) -> Result<R, DriveShaftError>
     where
         F: FnOnce(&mut T) -> R + Send + 'static,
         R: Send + Debug + 'static,
