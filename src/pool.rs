@@ -1,5 +1,12 @@
 use crossbeam::deque::{Injector, Worker};
+use std::future::Future;
+use std::pin::Pin;
+use std::task::Context;
 use std::{collections::VecDeque, fmt::Debug, sync::Arc};
+use std::{
+    sync::Mutex,
+    task::{Poll, Waker},
+};
 use tokio::sync::oneshot;
 
 use crate::{actor::Actor, error::DriveShaftError, job::Job};
@@ -60,19 +67,58 @@ where
         Self { injector, actors }
     }
 
-    pub async fn run_with<R, F>(&self, job: F) -> Result<R, DriveShaftError>
+    pub async fn run_with<R, F>(&self, job: F) -> RunWithFuture<R>
     where
         F: FnOnce(&mut T) -> R + Send + 'static,
         R: Send + Debug + 'static,
     {
-        let (tx, rx) = oneshot::channel();
-        let wrapped_job = |context: &mut T| -> Result<(), DriveShaftError> {
-            tx.send(job(context))
-                .map_err(|_err| DriveShaftError::SendError)?;
+        let shared = Arc::new(Mutex::new(SharedState {
+            result: None,
+            waker: None,
+        }));
+
+        let shared_cloned = shared.clone();
+
+        let wrapped_job = move |context: &mut T| -> Result<(), DriveShaftError> {
+            let result = job(context);
+
+            let mut shared = shared_cloned.lock().unwrap();
+            shared.result = Some(result);
+
+            if let Some(waker) = shared.waker.take() {
+                waker.wake();
+            }
+
             Ok(())
         };
+
         self.injector.push(Box::new(wrapped_job));
 
-        rx.await.map_err(|_err| DriveShaftError::RecvError)
+        RunWithFuture { shared }
+    }
+}
+
+struct SharedState<R> {
+    result: Option<R>,
+    waker: Option<Waker>,
+}
+
+pub struct RunWithFuture<R> {
+    shared: Arc<Mutex<SharedState<R>>>,
+}
+
+impl<R> Future for RunWithFuture<R> {
+    type Output = Result<R, DriveShaftError>;
+
+    fn poll(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Self::Output> {
+        let mut shared = self.shared.lock().unwrap();
+
+        if let Some(result) = shared.result.take() {
+            Poll::Ready(Ok(result))
+        } else {
+            // Save the waker to notify later
+            shared.waker = Some(cx.waker().clone());
+            Poll::Pending
+        }
     }
 }
