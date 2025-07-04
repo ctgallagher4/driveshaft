@@ -2,7 +2,7 @@
 
 **A minimal, high-performance thread pool for running synchronous tasks with per-thread context from async code.**
 
-**NOTE: This repository is under heavy development**
+**NOTE: This crate is under heavy development. Expect breaking API changes.**
 
 ---
 
@@ -32,7 +32,7 @@ use driveshaft::DriveShaftPool;
 #[tokio::main]
 async fn main() {
     // Create 4 contexts — one for each worker
-    let ctxs: Vec<_> = (0..4)
+    let ctxs: VecDeque<_> = (0..4)
         .map(|_| create_context())
         .collect();
 
