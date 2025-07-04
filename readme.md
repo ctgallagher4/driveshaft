@@ -10,7 +10,7 @@
 
 DriveShaft is a lightweight thread pool designed to **bridge the gap between async and sync Rust**. It lets you **spawn synchronous closures** that execute on dedicated worker threads — each thread holding a long-lived, mutable context of your choosing (e.g. a RocksDB instance, a database connection, or some custom state).
 
-This is especially useful when integrating **blocking libraries** (like RocksDB, SQLite, image processing, etc.) into an async application without blocking the runtime.
+This is especially useful when integrating **blocking libraries** (like RocksDB, SQLite, image processing, etc.) into an async application without blocking the runtime or when you need a simple way to spawn cpu intense operations from your async runtime.
 
 ---
 
@@ -72,9 +72,9 @@ Each thread owns its own T context.
 
 Tasks are FnOnce(&mut T) closures.
 
-Results are sent back via a oneshot channel.
+Results are sent back by implementing Future.
 
-A DriveShaftPool distributes jobs across threads using round-robin.
+A DriveShaftPool distributes jobs across threads using `crossbeam::deque`.
 
 ## Crate Roadmap
 
