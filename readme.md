@@ -2,7 +2,7 @@
 
 **A minimal, high-performance thread pool for running synchronous tasks with per-thread context from async code.**
 
-**NOTE: This repository is under heavy development**
+**NOTE: This crate is under heavy development. Expect breaking API changes.**
 
 ---
 
@@ -10,7 +10,7 @@
 
 DriveShaft is a lightweight thread pool designed to **bridge the gap between async and sync Rust**. It lets you **spawn synchronous closures** that execute on dedicated worker threads — each thread holding a long-lived, mutable context of your choosing (e.g. a RocksDB instance, a database connection, or some custom state).
 
-This is especially useful when integrating **blocking libraries** (like RocksDB, SQLite, image processing, etc.) into an async application without blocking the runtime.
+This is especially useful when integrating **blocking libraries** (like RocksDB, SQLite, image processing, etc.) into an async application without blocking the runtime or when you need a simple way to spawn cpu intense operations from your async runtime.
 
 ---
 
@@ -18,8 +18,7 @@ This is especially useful when integrating **blocking libraries** (like RocksDB,
 
 - **Run sync closures from async code** with `.run_with(...)`
 - **Custom per-thread context** (`&mut T`) — no `Arc<Mutex<_>>` needed
-- **Bounded or unbounded channels** for backpressure or unbounded throughput
-- **Round-robin load balancing** across threads
+- **Work Stealing** across threads
 - **Returns results via async `await`**
 - Foundation for higher-level wrappers (TBD)
 
@@ -33,14 +32,12 @@ use driveshaft::DriveShaftPool;
 #[tokio::main]
 async fn main() {
     // Create 4 contexts — one for each worker
-    let ctxs: Vec<_> = (0..4)
+    let ctxs: VecDeque<_> = (0..4)
         .map(|_| create_context())
         .collect();
 
     // Spawn a pool with those contexts
-    let mut pool = DriveShaftPoolBuilder::new()
-        .worker_type(driveshaft::WorkerType::Bound(32)) // 32-slot queue per worker
-        .build(ctxs);
+    let mut pool = DriveShaftPool::new(ctxs);
 
     // Run a blocking call from async context
     let result = pool
@@ -75,9 +72,9 @@ Each thread owns its own T context.
 
 Tasks are FnOnce(&mut T) closures.
 
-Results are sent back via a oneshot channel.
+Results are sent back by implementing Future.
 
-A DriveShaftPool distributes jobs across threads using round-robin.
+A DriveShaftPool distributes jobs across threads using `crossbeam::deque`.
 
 ## Crate Roadmap
 
