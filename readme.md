@@ -12,6 +12,18 @@ DriveShaft is a lightweight thread pool designed to **bridge the gap between asy
 
 This is especially useful when integrating **blocking libraries** (like RocksDB, SQLite, image processing, etc.) into an async application without blocking the runtime or when you need a simple way to spawn cpu intense operations from your async runtime.
 
+## Summary of Benchmarks
+
+Generally, when the async runtime is under heavy load:
+| Task Type | spawn blocking | driveshaft         | direct on runtime        |
+| --------- | --------------- | ------------------ | ---------------- |
+| CPU-heavy | ❌ a few times slower   | ✅ Fastest          | ⚠️ Poor scaling  |
+| IO-heavy  | ✅ Best          | ⚠️ Slightly behind | ❌ Extremely slow |
+
+As the load decreases, driveshaft and spawn_blocking tend to even out for CPU-heavy workloads.
+
+As with any benchmarks, you should run them yourself using a workload similar to how you might use driveshaft. You can find some sample code to get you started [here](https://github.com/ctgallagher4/driveshaft-bench-examples). The machine you use to benchmark should have a few more cores available than the number of threads you plan to benchmark with for a meaninful assessment.
+
 ---
 
 ## Key Features
@@ -78,19 +90,19 @@ A DriveShaftPool distributes jobs across threads using `crossbeam::deque`.
 
 ## Crate Roadmap
 
- -[X] Per-thread context ownership
+ - [X] Per-thread context ownership
 
- -[X] run_with async API
+ - [X] run_with async API
 
- -[X] Bounded / unbounded channel modes
+ - [X] Bounded / unbounded channel modes
 
--[] Graceful shutdown
+ - [ ] Graceful shutdown
 
--[] Retry / backpressure handling
+ - [ ] Retry / backpressure handling
 
--[] Metrics + tracing
+ - [ ] Metrics + tracing
 
--[] Runtime-agnostic executor trait
+ - [ ] Runtime-agnostic executor trait
 
 ## Contributing
 
