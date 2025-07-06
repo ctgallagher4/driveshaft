@@ -22,7 +22,7 @@ Generally, when the async runtime is under heavy load:
 
 As the load decreases, driveshaft and spawn_blocking tend to even out for CPU-heavy workloads.
 
-As with any benchmarks, you should run them yourself using a workload similar to how you might use driveshaft. You can find some sample code to get you started [here](https://github.com/ctgallagher4/driveshaft-bench-examples). The machine you use to benchmark should have a few more cores available than the number of threads you plan to benchmark with for a meaninful assessment.
+As with any benchmarks, you should run them yourself using a workload similar to how you might use driveshaft. You can find some sample code to get you started [here](https://github.com/ctgallagher4/driveshaft-bench-examples). The machine you use to benchmark should have a few more cores available than the number of threads you plan to benchmark with for a meaningful assessment.
 
 ---
 
